@@ -123,13 +123,16 @@ getUnicodes: does [
 		append list/data rejoin [i " : " to-char i]
 		i: i + 1
 	]
-	;--get first unicode character in the list
+	;--get first unicode character in the selected list
 	list/selected: 1
-	b: split first list/data " : "
-	v: to-integer b/1 either v > FFFFh [len: 6] [len: 4]
-	sb3/text: rejoin [form to-hex/size v len "h"]
-	f3/text:  rejoin [form end - start + 1 " Symbols"]
-	cc/text:  b/2
+	attempt [
+		b: split first list/data " : "
+		v: to-integer b/1 
+		len: pick [6 4] v > FFFFh
+		sb3/text: rejoin [form to-hex/size v len "h"]
+		f3/text:  rejoin [form end - start + 1 " Symbols"]
+		cc/text:  b/2
+	]
 ]
 
 view win: layout [
@@ -166,11 +169,13 @@ view win: layout [
 	
 	list: text-list 120x350 font-size 12 data []
 	on-change [
-		b: split face/data/(face/selected) " : "
-		v:  to-integer b/1
-		either v > FFFFh [len: 6] [len: 4]
-		sb3/text: rejoin [form to-hex/size v len "h"]
-		cc/text: b/2
+		attempt [
+			b: split face/data/(face/selected) " : "
+			v:  to-integer b/1
+			len: pick [6 4] v > FFFFh
+			sb3/text: rejoin [form to-hex/size v len "h"]
+			cc/text: b/2
+		]
 	]
 	pad 2x0 cc: base 200x150 white middle center font-size 80 return
 	sb1: field 300
